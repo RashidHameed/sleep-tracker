@@ -9,6 +9,8 @@ import {
   type AlarmSettings,
   type InsertAlarmSettings
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Sleep logs
@@ -27,6 +29,125 @@ export interface IStorage {
   getAlarmSettings(): Promise<AlarmSettings | undefined>;
   updateAlarmSettings(settings: Partial<InsertAlarmSettings>): Promise<AlarmSettings>;
   createAlarmSettings(settings: InsertAlarmSettings): Promise<AlarmSettings>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getSleepLogs(): Promise<SleepLog[]> {
+    return await db.select().from(sleepLogs).orderBy(sleepLogs.createdAt).then(logs => 
+      logs.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+    );
+  }
+
+  async getSleepLog(id: number): Promise<SleepLog | undefined> {
+    const [log] = await db.select().from(sleepLogs).where(eq(sleepLogs.id, id));
+    return log || undefined;
+  }
+
+  async createSleepLog(insertSleepLog: InsertSleepLog): Promise<SleepLog> {
+    // Calculate duration
+    const bedtimeParts = insertSleepLog.bedtime.split(':');
+    const waketimeParts = insertSleepLog.wakeTime.split(':');
+    
+    const bedtimeMinutes = parseInt(bedtimeParts[0]) * 60 + parseInt(bedtimeParts[1]);
+    const waketimeMinutes = parseInt(waketimeParts[0]) * 60 + parseInt(waketimeParts[1]);
+    
+    let durationMinutes = waketimeMinutes - bedtimeMinutes;
+    if (durationMinutes < 0) {
+      durationMinutes += 24 * 60; // Add 24 hours if wake time is next day
+    }
+    
+    const duration = durationMinutes / 60;
+
+    const [log] = await db
+      .insert(sleepLogs)
+      .values({
+        ...insertSleepLog,
+        duration,
+        notes: insertSleepLog.notes || null,
+      })
+      .returning();
+    return log;
+  }
+
+  async deleteSleepLog(id: number): Promise<void> {
+    await db.delete(sleepLogs).where(eq(sleepLogs.id, id));
+  }
+
+  async deleteAllSleepLogs(): Promise<void> {
+    await db.delete(sleepLogs);
+  }
+
+  async getReminders(): Promise<Reminder[]> {
+    return await db.select().from(reminders);
+  }
+
+  async updateReminder(id: number, reminder: Partial<InsertReminder>): Promise<Reminder> {
+    const [updated] = await db
+      .update(reminders)
+      .set(reminder)
+      .where(eq(reminders.id, id))
+      .returning();
+    
+    if (!updated) {
+      throw new Error(`Reminder with id ${id} not found`);
+    }
+    
+    return updated;
+  }
+
+  async createReminder(reminder: InsertReminder): Promise<Reminder> {
+    const [newReminder] = await db
+      .insert(reminders)
+      .values({
+        ...reminder,
+        enabled: reminder.enabled ?? 1
+      })
+      .returning();
+    return newReminder;
+  }
+
+  async getAlarmSettings(): Promise<AlarmSettings | undefined> {
+    const [settings] = await db.select().from(alarmSettings).limit(1);
+    return settings || undefined;
+  }
+
+  async updateAlarmSettings(settings: Partial<InsertAlarmSettings>): Promise<AlarmSettings> {
+    const existing = await this.getAlarmSettings();
+    
+    if (!existing) {
+      // Create new settings if none exist
+      const [newSettings] = await db
+        .insert(alarmSettings)
+        .values({
+          enabled: settings.enabled ?? 1,
+          windowStart: settings.windowStart ?? '06:30',
+          windowEnd: settings.windowEnd ?? '07:00',
+          tone: settings.tone ?? 'Gentle Chimes'
+        })
+        .returning();
+      return newSettings;
+    }
+    
+    const [updated] = await db
+      .update(alarmSettings)
+      .set(settings)
+      .where(eq(alarmSettings.id, existing.id))
+      .returning();
+    
+    return updated;
+  }
+
+  async createAlarmSettings(settings: InsertAlarmSettings): Promise<AlarmSettings> {
+    const [newSettings] = await db
+      .insert(alarmSettings)
+      .values({
+        ...settings,
+        enabled: settings.enabled ?? 1,
+        tone: settings.tone ?? 'Gentle Chimes'
+      })
+      .returning();
+    return newSettings;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -164,4 +285,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

@@ -22,10 +22,11 @@ This is a full-stack sleep tracking application built with React, Express.js, an
 - **Validation**: Zod schemas shared between client and server
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL (configured for Neon serverless)
+- **Primary Database**: PostgreSQL with persistent storage
 - **ORM**: Drizzle ORM for type-safe database queries
 - **Migration System**: Drizzle Kit for schema migrations
-- **Session Storage**: PostgreSQL-backed session store
+- **Connection**: Neon serverless driver with WebSocket support
+- **Initialization**: Automatic database setup with default data
 
 ## Key Components
 
@@ -99,6 +100,7 @@ This is a full-stack sleep tracking application built with React, Express.js, an
 - June 19, 2025: Initial setup with comprehensive sleep tracking features
 - June 19, 2025: Removed data export functionality and relaxation tools timer as requested
 - June 19, 2025: Prepared project for GitHub publication with README, LICENSE, and .gitignore
+- June 19, 2025: Added PostgreSQL database integration with persistent storage
 
 ## User Preferences
 
