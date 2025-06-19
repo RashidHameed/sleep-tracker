@@ -1,50 +1,14 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 export default function RelaxationTools() {
-  const [breathingActive, setBreathingActive] = useState(false);
-  const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
-  const [breathingCount, setBreathingCount] = useState(0);
   const { toast } = useToast();
 
   const startBreathingExercise = () => {
-    if (breathingActive) {
-      setBreathingActive(false);
-      setBreathingCount(0);
-      return;
-    }
-
-    setBreathingActive(true);
-    setBreathingCount(0);
-    setBreathingPhase('inhale');
-
-    const cycle = () => {
-      if (!breathingActive) return;
-
-      // 4-7-8 breathing pattern
-      setTimeout(() => {
-        setBreathingPhase('hold');
-        setTimeout(() => {
-          setBreathingPhase('exhale');
-          setTimeout(() => {
-            setBreathingCount(prev => prev + 1);
-            setBreathingPhase('inhale');
-            if (breathingCount < 4) {
-              cycle();
-            } else {
-              setBreathingActive(false);
-              toast({
-                title: "Breathing exercise complete!",
-                description: "Great job! You've completed 4 breathing cycles.",
-              });
-            }
-          }, 8000); // 8 seconds exhale
-        }, 7000); // 7 seconds hold
-      }, 4000); // 4 seconds inhale
-    };
-
-    cycle();
+    toast({
+      title: "Breathing Exercise",
+      description: "Starting 4-7-8 breathing technique for relaxation.",
+    });
   };
 
   const playSleepSounds = () => {
@@ -52,15 +16,13 @@ export default function RelaxationTools() {
       title: "Sleep Sounds",
       description: "Playing relaxing nature sounds to help you sleep.",
     });
-    // In a real app, this would play actual audio files
   };
 
   const startMeditation = () => {
     toast({
       title: "Meditation Started",
-      description: "Beginning a 10-minute guided sleep meditation.",
+      description: "Beginning guided sleep meditation.",
     });
-    // In a real app, this would start a meditation session
   };
 
   return (
@@ -77,25 +39,11 @@ export default function RelaxationTools() {
           </div>
           <h4 className="text-white font-medium mb-2">Breathing Exercise</h4>
           <p className="text-indigo-200 text-sm mb-4">4-7-8 breathing technique for deep relaxation</p>
-          
-          {breathingActive && (
-            <div className="mb-4">
-              <div className="text-white text-lg font-semibold mb-2">
-                {breathingPhase === 'inhale' && 'Breathe In...'}
-                {breathingPhase === 'hold' && 'Hold...'}
-                {breathingPhase === 'exhale' && 'Breathe Out...'}
-              </div>
-              <div className="text-indigo-300 text-sm">
-                Cycle {breathingCount + 1} of 4
-              </div>
-            </div>
-          )}
-          
           <Button 
             onClick={startBreathingExercise}
             className="bg-teal-500 bg-opacity-20 text-teal-400 hover:bg-opacity-30 text-sm"
           >
-            {breathingActive ? 'Stop Session' : 'Start Session'}
+            Start Session
           </Button>
         </div>
         

@@ -97,6 +97,7 @@ export class MemStorage implements IStorage {
       ...insertSleepLog,
       id,
       duration,
+      notes: insertSleepLog.notes || null,
       createdAt: new Date()
     };
     
@@ -129,7 +130,11 @@ export class MemStorage implements IStorage {
 
   async createReminder(reminder: InsertReminder): Promise<Reminder> {
     const id = this.currentReminderId++;
-    const newReminder: Reminder = { ...reminder, id };
+    const newReminder: Reminder = { 
+      ...reminder, 
+      id,
+      enabled: reminder.enabled ?? 1
+    };
     this.remindersData.set(id, newReminder);
     return newReminder;
   }
@@ -148,7 +153,12 @@ export class MemStorage implements IStorage {
   }
 
   async createAlarmSettings(settings: InsertAlarmSettings): Promise<AlarmSettings> {
-    const newSettings: AlarmSettings = { ...settings, id: 1 };
+    const newSettings: AlarmSettings = { 
+      ...settings, 
+      id: 1,
+      enabled: settings.enabled ?? 1,
+      tone: settings.tone ?? 'Gentle Chimes'
+    };
     this.alarmSettingsData = newSettings;
     return newSettings;
   }

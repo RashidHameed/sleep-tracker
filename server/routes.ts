@@ -182,32 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Export data route
-  app.get("/api/export", async (req, res) => {
-    try {
-      const sleepLogs = await storage.getSleepLogs();
-      
-      // Convert to CSV format
-      const headers = ['Date', 'Bedtime', 'Wake Time', 'Duration (hours)', 'Quality (1-5)', 'Notes'];
-      const csvData = [
-        headers.join(','),
-        ...sleepLogs.map(log => [
-          log.date,
-          log.bedtime,
-          log.wakeTime,
-          log.duration.toFixed(2),
-          log.quality,
-          `"${log.notes || ''}"`
-        ].join(','))
-      ].join('\n');
 
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="sleep-data.csv"');
-      res.send(csvData);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to export data" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;

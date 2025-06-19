@@ -96,8 +96,9 @@ This is a full-stack sleep tracking application built with React, Express.js, an
 
 ## Changelog
 
-Changelog:
-- June 19, 2025. Initial setup
+- June 19, 2025: Initial setup with comprehensive sleep tracking features
+- June 19, 2025: Removed data export functionality and relaxation tools timer as requested
+- June 19, 2025: Prepared project for GitHub publication with README, LICENSE, and .gitignore
 
 ## User Preferences
 

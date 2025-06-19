@@ -23,22 +23,7 @@ export default function SleepTracker() {
   const weeklyAverage = analytics?.averageDuration || 0;
   const averageQuality = analytics?.averageQuality || 0;
 
-  const handleExportData = async () => {
-    try {
-      const response = await fetch('/api/export');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sleep-data.csv';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Failed to export data:', error);
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white">
@@ -164,40 +149,26 @@ export default function SleepTracker() {
             <span>Data & Privacy</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="text-white font-medium">Export Your Data</h4>
-              <p className="text-indigo-200 text-sm">Download all your sleep data as a CSV file for analysis or backup.</p>
+          <div className="space-y-4">
+            <h4 className="text-white font-medium">Privacy Settings</h4>
+            <p className="text-indigo-200 text-sm">Manage your data and privacy preferences.</p>
+            <div className="space-y-2">
               <Button 
-                onClick={handleExportData}
-                className="bg-blue-500 bg-opacity-20 text-blue-400 hover:bg-opacity-30 flex items-center space-x-2"
-              >
-                <span>📥</span>
-                <span>Export Sleep Data</span>
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="text-white font-medium">Privacy Settings</h4>
-              <p className="text-indigo-200 text-sm">Manage your data and privacy preferences.</p>
-              <div className="space-y-2">
-                <Button 
-                  variant="destructive"
-                  className="w-full bg-red-500 bg-opacity-20 text-red-400 hover:bg-opacity-30 text-left justify-start"
-                  onClick={async () => {
-                    if (confirm('Are you sure you want to delete all sleep data? This action cannot be undone.')) {
-                      try {
-                        await fetch('/api/sleep-logs', { method: 'DELETE' });
-                        window.location.reload();
-                      } catch (error) {
-                        console.error('Failed to delete data:', error);
-                      }
+                variant="destructive"
+                className="bg-red-500 bg-opacity-20 text-red-400 hover:bg-opacity-30 flex items-center space-x-2"
+                onClick={async () => {
+                  if (confirm('Are you sure you want to delete all sleep data? This action cannot be undone.')) {
+                    try {
+                      await fetch('/api/sleep-logs', { method: 'DELETE' });
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Failed to delete data:', error);
                     }
-                  }}
-                >
-                  <span className="mr-2">🗑️</span>Delete All Sleep Data
-                </Button>
-              </div>
+                  }
+                }}
+              >
+                <span>🗑️</span>Delete All Sleep Data
+              </Button>
             </div>
           </div>
         </div>
