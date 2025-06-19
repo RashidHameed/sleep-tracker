@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { reminders, alarmSettings } from "@shared/schema";
+import { addSampleData } from "./seed-data";
 
 export async function initializeDatabase() {
   try {
@@ -36,6 +37,9 @@ export async function initializeDatabase() {
       });
       console.log('✓ Default alarm settings created');
     }
+
+    // Add sample sleep data
+    await addSampleData();
   } catch (error) {
     console.error('Database initialization error:', error);
   }
